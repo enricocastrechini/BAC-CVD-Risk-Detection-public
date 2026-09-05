@@ -1,0 +1,41 @@
+name: Repository quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile project Python files
+        run: |
+          python -m py_compile \
+            vanilla-pretrained/train_caller.py \
+            vanilla-pretrained/test_caller.py \
+            vanilla-pretrained/src/data/pre_processing.py \
+            vanilla-pretrained/src/models/models.py \
+            vanilla-pretrained/src/utils/train.py \
+            vanilla-pretrained/src/utils/test.py \
+            knowledge-distillation/dataset/mammo_bac.py
+
+      - name: Check shell scripts
+        run: |
+          bash -n self-supervised-learning/Pre-Training/Contrastive_Learning/run_exp.sh
+          bash -n self-supervised-learning/Pre-Training/Masked_Autoencoder/run_exp.sh
+
+      - name: Check for private machine paths
+        run: |
+          if grep -RInE '/home/(castrechini|wolfda)|/Users/|C:\\\\Users\\\\' \
+            --exclude-dir=.git --exclude='*.ipynb' .; then
+            echo "Private machine paths found in tracked project files."
+            exit 1
+          fi

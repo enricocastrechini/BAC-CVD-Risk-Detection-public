@@ -1,0 +1,28 @@
+visualize:
+    vis: False
+    path: 'figures/dataset/' # Path to save the figure samples
+
+models: # testing models
+    model_name: "convnextsmall" # 'resnet18', 'resnet50', 'densenet161','densenet121'
+    out_neurons: 1 # Output neurons
+    model_weights: 'results/convnextsmall_student_2/2024-06-12_12-22-16/fold0/weights.pth' # Traubed weights of the model
+
+
+log: # Logger to keep track of the execution progress
+    mode: 'a'
+    path: 'logs/RunningLogs.txt'
+
+test:
+    ts_path: ['data/test.csv'] # test CSV path; provide an authorized local dataset
+    device: 'cuda'
+    batch_size: 8
+    save_path: 'results/convnextsmall_student_2/2024-06-12_12-22-16/' # Path to store the results of test run
+    interpret_layer: 'model.layer4[-1]' # the target layer on which we want to view the gradcams, e.g. model.layer4[-1] for resnet model
+    seed: 42
+    fold: 0 # Fold to test the model on
+
+data:
+    transform: # Transformation Parameters for images
+        height: 1120            #1536  (lit)    #3040  (max)      #2208 (mean)
+        width: 576              #768   (lit)    #2400  (max)      #1088 (mean)
+        normalize: False

@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Datasets and private metadata
+*.csv
+*.dcm
+*.nii
+*.nii.gz
+*.jpg
+*.jpeg
+*.png
+*.tif
+*.tiff
+!docs/assets/
+!docs/assets/**
+
+# Model checkpoints and experiment outputs
+*.bin
+*.ckpt
+*.h5
+*.onnx
+*.pkl
+*.pickle
+*.pt
+*.pth
+*.safetensors
+*.npz
+results/
+checkpoints/
+runs/
+wandb/
+tensorboard/
+logs/
+weights/
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.example.json
+*.swp

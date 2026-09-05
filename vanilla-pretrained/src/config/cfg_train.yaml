@@ -1,0 +1,52 @@
+visualize:
+    vis: False # Flag to enable or disable visualizing random images
+    path: 'figures/dataset/' # Path to save the figure samples
+
+models: # Training or testing models
+    model_name: "convnextsmall" # 'resnet18', 'resnet50', 'densenet161','densenet121'
+    out_neurons: 1 # Output neurons
+    fr_layer: 0 # 0 means no freeze. It can be a string or integer. String must correspond to block with numbers e.g. in densenet, denseblock4 - would make layers till denseblock4 trainable and rest would freeze 
+    pretrained: True # load the pretrained weights
+
+log: # Logger to keep track of the execution progress
+    mode: 'a'
+    path: 'logs/RunningLogs.txt'
+
+train:
+    tr_path: ['data/train.csv'] # training csv files path; provide an authorized local dataset
+    pseudo_path: ['data/filtered_predictions_no_index.csv'] # optional pseudo-label CSV
+    vd_path: ['data/valid.csv'] # validation csv files path; provide an authorized local dataset
+    epochs: 60 # number of epochs
+    batch_size: 8
+    train_continue: False # flag to continue training
+    version: '' # mandatory if required to continue training
+    patience: 10 # early stopping patience value
+    weights_dir: 'weights/' # directory to store the weights
+    trlogs_dir: 'logs_training/' # directory to store the training logs in csv
+    lr: 1e-6 # initial training learning rate. Here Adam is used
+    lr_decay_factor: 0.1 # factor to reduce the learning rate after validation loss plateaus
+    lr_pat: 3 # patience value of ReduceLROnPlateau scheduler
+    optimizer: 'Adam' # Optimizer selection
+    scheduler: 'CosineAnnealingLR' # Scheduler selection #CosineAnnealingLR
+    loss: 'WBCE' # Loss function
+    weight_decay: 0 # Add weight decay
+    device: 'cuda'
+    save_path: 'results/' 
+    num_folds: 1 # Number of folds for cross validation
+    lr_iterations: 60 # num iterations (or epochs) after which the lr will reach its minimum value and start increasing again. #21 for 30 epochs
+    seed: 42 # Seed for reproducibility
+    amp: True
+    early_stopping: True
+
+    use_curriculum: False
+    num_phases: 1
+    initial_phase_proportion: 1
+    max_phase_proportion: 0.5
+
+
+data:
+    transform: # Transformation Parameters for images
+        height: 1120            #1536  (lit)    #3048  (max)  #1524 (half)   #2208 (mean)  #1120 (mean half)  #576 (mean / 4)
+        width: 576             #768   (lit)    #2400 (max)   #1200 (half)   #1088 (mean)  #576   (mean half)  #288 (mean / 4)
+        normalize: False
+        augmentation: True
