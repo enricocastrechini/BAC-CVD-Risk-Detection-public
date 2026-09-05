@@ -5,7 +5,11 @@ detection in mammograms**, investigated as a potential imaging biomarker
 for cardiovascular disease (CVD) risk.
 
 This repository contains the experimental pipelines developed around the
-associated master's thesis, including:
+associated master's thesis. The project is organized around one common
+question: how can BAC classification be improved when expert-labeled
+mammograms are scarce but unlabeled mammograms are available?
+
+The repository includes:
 
 -   supervised transfer learning;
 -   semi-supervised learning through pseudolabeling;
@@ -18,6 +22,20 @@ associated master's thesis, including:
 > a clinical decision-support system. The underlying mammography
 > dataset, patient metadata, trained checkpoints and experiment outputs
 > are not publicly released.
+
+## Start here
+
+Choose the pipeline that matches the experiment you want to reproduce:
+
+| Pipeline | Purpose | Entry point |
+| --- | --- | --- |
+| [Vanilla pretrained](vanilla-pretrained/README.md) | Supervised ImageNet transfer-learning baseline | `train_caller.py`, `test_caller.py` |
+| [Knowledge distillation](knowledge-distillation/README.md) | Teacher-to-student transfer with KD, CRD and related losses | `train_teacher.py`, `train_student.py` |
+| [Self-supervised learning](self-supervised-learning/README.md) | Unlabeled-image pretraining followed by BAC fine-tuning | `Pre-Training/`, `Downstream/` |
+
+Before running any pipeline, read [the reproducibility guide](docs/REPRODUCIBILITY.md).
+It defines the data boundary, environment variables, output policy and
+validation levels used throughout the project.
 
 ------------------------------------------------------------------------
 
@@ -309,7 +327,7 @@ classifier is focusing on clinically plausible areas.
 ``` text
 BAC-CVD-Risk-Detection/
 ├── vanilla-pretrained/
-│   ├── config/
+│   ├── src/config/
 │   ├── src/
 │   ├── train_caller.py
 │   └── test_caller.py
@@ -323,7 +341,8 @@ BAC-CVD-Risk-Detection/
 │   └── train_student.py
 │
 ├── self-supervised-learning/
-│   └── ...
+│   ├── Pre-Training/
+│   └── Downstream/
 │
 ├── docs/
 │   ├── assets/
@@ -349,7 +368,9 @@ classification task.
 
 ## Reproducibility
 
-The complete experimental dataset cannot be distributed publicly.
+The complete experimental dataset cannot be distributed publicly. The
+pipeline READMEs describe expected layouts and commands, but they do not
+provide data, credentials or checkpoints.
 
 To reproduce the experiments, an authorized user needs:
 

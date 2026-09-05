@@ -1,15 +1,7 @@
-# Prprocessing
+# Data Preprocessing
 
-Download the LIDC-IDRI Dataset from here: [https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=1966254](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=1966254) 
+This folder contains the upstream DICOM-to-2D-PNG utility `LIDC_3DDICOM_to_2Dpng.py`. It was inherited from the original CT-focused self-supervised-learning project and is not required when the mammography images have already been converted and preprocessed by the main project pipeline.
 
-The data comes as DICOM images. We save each slice of each CT volume as a png file. We do not applay any windwoing since we want to use all data for pre-training. 
+Use it only with authorized DICOM data. Before running, inspect the paths in the script and direct the output to a local, ignored directory. The conversion does not apply CT windowing because the original use case pretrains on all available slice information; this choice is not automatically appropriate for mammography.
 
-### Start: 
-If you are using Conda on Linux, here is how to get started: 
-1. Open your terminal and follow these steps: 
-    1. <code>conda create --name SSL_Preprocessing python==3.10</code>
-    2. <code>conda activate SSL_Preprocessing</code>
-    4. <code>cd ...SSL-MedicalImagining-CL-MAE/Pre-Training/Data_Preprocessing</code>
-    5. <code>pip install -r requirements.txt</code>
-2. Open LIDC_3DDICOM_to_2Dpng.py and adjust the folder pathes in the main method
-
+The dependencies are listed in `requirements.txt`. Keep the input data, converted images and any metadata outside the public repository.

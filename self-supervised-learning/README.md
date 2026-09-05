@@ -1,112 +1,50 @@
-# Self-Supervised Pre-Training with Contrastive and Masked Autoencoder Methods for Dealing with Small Datasets in Deep Learning for Medical Imaging
+# Self-Supervised Learning
 
-Publication about self-supervised pre-training in medical imaging accepted in Nature Scientific Reports. \
-Nature: https://doi.org/10.1038/s41598-023-46433-0 \
-ArXiv: <https://arxiv.org/abs/2308.06534>
+This pipeline explores whether unlabeled mammograms can provide useful representations for BAC classification. It contains two stages:
 
-## Introduction
-Training deep learning models requires large datasets with annotations for all training samples. However, in the medical imaging domain, annotated datasets for specific tasks are often small due to the high complexity of annotations, limited access, or the rarity of diseases. To address this challenge, deep learning models can be pre-trained on large image datasets without annotations using methods from the field of self-supervised learning.
-In this paper we compare state-of-the-art self-supervised pre-training methods based on contrastive learning ([SwAV](https://proceedings.neurips.cc/paper/2020/hash/70feb62b69f16e0238f741fab228fec2-Abstract.html), [MoCo](https://openaccess.thecvf.com/content_CVPR_2020/html/He_Momentum_Contrast_for_Unsupervised_Visual_Representation_Learning_CVPR_2020_paper.html), [BYOL](https://proceedings.neurips.cc/paper_files/paper/2020/file/f3ada80d5c4ee70142b17b8192b2958e-Paper.pdf)) and masked autoencoders ([SparK](https://openreview.net/forum?id=NRxydtWup1S)) for convolutional neural networks (CNNs).
+1. self-supervised pretraining on unlabeled images;
+2. supervised downstream fine-tuning on the labeled BAC dataset.
 
-![SSL](https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE/assets/75016933/cf1589b7-4ea7-463e-866b-15586e131cd0)
+The code is adapted from [SSL-MedicalImaging-CL-MAE](https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE), which originally targets CT data. In this repository, the documented experiment path uses the mammography data variables and image dimensions shown below. The original CT/LIDC instructions are retained only as method provenance, not as a public dataset requirement.
 
-Due to the challenge of obtaining sufficient annotated training data in medical imaging, it is of particular interest to evaluate how the self-supervised pre-training methods perform when fine-tuning on small datasets. Our experiments show, that the SparK pre-training method is more robust to the training downstream dataset size than the contrastive methods. Based on our results, we propose the SparK pre-training for medical imaging tasks with only small annotated datasets.
+## Directory guide
 
-## Code 
+- [`Pre-Training/`](Pre-Training/): preprocessing, contrastive methods (SwAV, MoCoV2, BYOL) and SparK masked autoencoder training.
+- [`Downstream/`](Downstream/): notebooks and dependencies for fine-tuning and evaluating pretrained encoders.
+- [`Pre-Training/Data_Preprocessing/`](Pre-Training/Data_Preprocessing/): upstream DICOM-to-PNG utilities; use only with authorized data.
 
-### 1) Pre-Training
-First, the deep learning model needs to be pre-trained with a large dataset of images without annotations. \
-Go to the folder [Pre-Training](https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE/tree/main/Pre-Training) for the the pre-training code and further explanations.. \
-You can download our pre-trained models below.
+## Environment and data
 
-### 2) Downstream
-The pre-training is evaluated on three downstream classification tasks. \
-You can test the downstream tasks with the pre-trained models you can download below. \
-Go to the folder [Downstream](https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE/tree/main/Downstream) for the the downstream code and further explanations.
+The private mammography images and checkpoints are not included. Set the following variables in the shell before running the supplied scripts:
 
-## Pre-Trained Models 
-You can download the pre-trained model checkpoints here from Google Drive:
-
-
-| Pre-Training  | Method                | Model       |Dowwnload Link |
-| ------------- | -------------         |------------ | ------------  |
-| BYOL          | Contrastive Learning  | ResNet50    |[BYOL_Checkpoint](https://drive.google.com/uc?export=download&id=1eBZYl1rXkKJxz42Wu75uzb1kLg8FTv1H)              |
-| SwAV          | Contrastive Learning  | ResNet50    |[SwAV_Checkpoint](https://drive.google.com/uc?export=download&id=11OWRzifq_BXrcFMZ13H0HwS4UGcaiAn_)               |
-| MoCoV2        | Contrastive Learning  | ResNet50    |[MoCoV2_Checkpoint](https://drive.google.com/uc?export=download&id=1hUr_6XdYxjB66ZYEGTqE7b8I88IN9a1l)            | 
-| SaprK         | Masked Autoencoder    | ResNet50    |[SparK_Checkpoint](https://drive.google.com/uc?export=download&id=1kYFS67jH9s8kAmhNyf5wlRj_Gh9vTK_H)               |
-
-
-Here is code to initialise a ResNet50 model from PyTorch with the pre-training weights stored in the Checkpoint:  \
-(pytorch==1.12.1 torchvision==0.13.1) \
-You can also check out the the [Downstream](https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE/tree/main/Downstream) code where this is already implemented.
-
-```python
-
-# Fill out: 
-# Choose the Pre-Training Method here [options: "SparK", "SwAV", "MoCo", "BYOL"]
-pre_train = "SparK"
-# Insert the downloaded file hier (.ckpt or .pth) 
-pre_training_checkpoint = "/path/to/download/model.ckpt"
-
-# PyTorch Resnet Model
-res_model = torchvision.models.resnet50()
-
-# Load pre-training weights
-state_dict = torch.load(pre_training_checkpoint)
-
-# Match the correct name of the layers between pre-trained model and PyTorch ResNet
-# Extraction:
-if "module" in state_dict: # (SparK)
-    state_dict = state_dict["module"] 
-if "state_dict" in state_dict: # (SwAV, MoCo, BYOL) 
-    state_dict = state_dict["state_dict"]
-# Replacement: 
-if pre_train == "SparK" or pre_train == "SwAV":
-        state_dict = {k.replace("model.", ""): v for k, v in state_dict.items()}  
-elif pre_train == "MoCo":
-    state_dict = {k.replace("encoder_q.", ""): v for k, v in state_dict.items()} 
-elif pre_train == "BYOL":
-    state_dict = {k.replace("online_network.encoder.", ""): v for k, v in state_dict.items()}
-
-# Initialisation of the ResNet model with pre-training checkpoints
-pretrained_model = res_model.load_state_dict(state_dict, strict=False)
-
-# Check if it works
-print(format(pretrained_model))
-# If this appears, everything is correct: 
-# missing_keys=
-  # ['fc.weight', 'fc.bias'] (beacuse the last fully connected layer was not pre-trained) 
-# unexpected_keys= 
-  # MoCo: All "encoder_k" layers (because MoCo has 2 encoders and we use only encoder_q)
-  # BYOL: All "online_network.projector" and "target_network.encoder" layers (because BYOL has 2 encoders and we only the online_network.encoder)
-  # SwAV: All "projection_head" layers (beacuse SwAV has an aditional projection head for the online clustering) 
-  # SparK: []
-
+```powershell
+$env:BAC_DATA_DIR = "D:\authorized\mammograms"
+$env:BAC_OUTPUT_DIR = "D:\experiments\bac-ssl"
 ```
 
-## Contact
-This work was done in a collaboration between the [Clinic of Radiology](https://www.uniklinik-ulm.de/radiologie-diagnostische-und-interventionelle.html) and the [Visual Computing Research Group](https://viscom.uni-ulm.de/) at the Univerity of Ulm.
+`BAC_DATA_DIR` must point to the local image directory expected by the selected loader. `BAC_OUTPUT_DIR` is optional and defaults to a local `results/` folder. Use `WANDB_MODE=offline` for local logging; provide `WANDB_API_KEY` only via the environment when online logging is required.
 
-My Profiles: 
-- [Ulm University Profile](https://viscom.uni-ulm.de/members/daniel-wolf/)
-- [Personal Website](https://wolfda95.github.io/)
-- [Google Scholar](https://scholar.google.de/citations?hl=de&user=vqKsXwgAAAAJ)
-- [Orcid](https://orcid.org/0000-0002-8584-5189)
-- [LinkedIn](https://www.linkedin.com/in/wolf-daniel/)
+## Pretraining
 
-If you have any questions, please email me:
-[daniel.wolf@uni-ulm.de](mailto:daniel.wolf@uni-ulm.de)
+For SparK, run from `Pre-Training/Masked_Autoencoder/` in Bash, Git Bash or WSL:
 
-## Cite
-```latex
-@article{wolf2023self,
-  title={Self-supervised pre-training with contrastive and masked autoencoder methods for dealing with small datasets in deep learning for medical imaging},
-  author={Wolf, Daniel and Payer, Tristan and Lisson, Catharina Silvia and Lisson, Christoph Gerhard and Beer, Meinrad and G{\"o}tz, Michael and Ropinski, Timo},
-  journal={Scientific Reports},
-  volume={13},
-  number={1},
-  pages={20260},
-  year={2023},
-  publisher={Nature Publishing Group UK London}
-}
+```bash
+export BAC_DATA_DIR=/path/to/authorized/mammograms
+export BAC_OUTPUT_DIR=/path/to/outputs/spark
+bash run_exp.sh
 ```
+
+The script uses ConvNeXt-Small, mammography input dimensions `1120 x 576`, 800 epochs and the optional `BAC_RESUME_CHECKPOINT`. For contrastive pretraining, use the method-specific scripts in `Pre-Training/Contrastive_Learning/`.
+
+## Downstream evaluation
+
+Open the relevant notebook in `Downstream/` after installing its `requirements.txt`. Set the local data, checkpoint and output paths in the first parameter cell, then run the notebook with the authorized labeled BAC split. Keep the encoder checkpoint, notebook parameters, seed and dependency versions with every reported result.
+
+## Results and limitations
+
+In the reported experiments, the SparK reconstruction objective reached a low loss but downstream BAC classification remained around chance level (AUC-ROC 0.50). This is a research result, not a claim that self-supervised learning cannot work for mammography; pretraining duration, augmentations, domain matching and checkpoint selection remain open variables.
+
+## References
+
+- Wolf et al., *Self-supervised pre-training with contrastive and masked autoencoder methods for dealing with small datasets in deep learning for medical imaging*, Scientific Reports (2023).
+- Tian et al., *Designing BERT for Convolutional Networks: Sparse and Hierarchical Masked Modeling* (SparK, ICLR 2023).

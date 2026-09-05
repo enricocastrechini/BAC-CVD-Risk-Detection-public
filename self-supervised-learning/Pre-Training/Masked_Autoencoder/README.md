@@ -1,50 +1,23 @@
-# Pre-Training with SparK
+# SparK Masked Autoencoder
 
-SparK is the first successful adaptation of masked autoencoder self-supervised pre-training to convolutional neural networks (CNNs).
+This component adapts the SparK masked autoencoder for convolutional encoders. It masks image patches during pretraining and reconstructs the missing content from the visible patches. The resulting encoder can be evaluated in the downstream BAC classification notebooks.
 
-This is code from the official implementation of SparK [https://github.com/keyu-tian/SparK](https://github.com/keyu-tian/SparK4) (MIT license)
+## Run
 
-### How to Start: 
-1. Download the LIDC data and run the preprocessing script as explained here: [https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE/tree/main/Pre-Training/Data_Preprocessing](https://github.com/Wolfda95/SSL-MedicalImagining-CL-MAE/tree/main/Pre-Training/Data_Preprocessing)
-2. Change the folder structure of the preprocessed data to: (Take part of the images as validation) 
-    ```bash
-        LIDC-Data
-       /         \
-     train       val
-     /             \ 
-    1               1
-    ```
-2. Open your terminal and follow these steps: 
-    1. <code>conda create --name SSL_Masked_Autoencoder python==3.8</code>
-    2. <code>conda activate SSL_Masked_Autoencoder</code>
-    3. <code>conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch</code>
-    4. <code>cd .../SSL-MedicalImagining-CL-MAE/Pre-Training/Masked_Autoencoder/</code>
-    5. <code>pip install -r requirements.txt</code>
-4. Start the pre-training with a bash script:
-    ```bash
-    #!/bin/bash
-    
-    python ./main.py \
-    --exp_name=ResNet50_1 \
-    --data_path=/path/to/LIDC-Data \
-    --model=resnet50 \
-    --bs=32 \
-    --exp_dir=/path/to/where/results/should/be/saved \
-    --ep=1600 \
-    ```
-For further information and other setting please refere to the SparK github: [https://github.com/keyu-tian/SparK](https://github.com/keyu-tian/SparK4)
+Install `requirements.txt`, then run from this directory with Bash, Git Bash or WSL:
 
-
-### SparK Paper
-Please also cite the SparK paper: 
-
-```latex
-@inproceedings{
-tian2023designing,
-title={Designing {BERT} for Convolutional Networks: Sparse and Hierarchical Masked Modeling},
-author={Keyu Tian and Yi Jiang and qishuai diao and Chen Lin and Liwei Wang and Zehuan Yuan},
-booktitle={The Eleventh International Conference on Learning Representations },
-year={2023},
-url={https://openreview.net/forum?id=NRxydtWup1S}
-}
+```bash
+export BAC_DATA_DIR=/path/to/authorized/mammograms
+export BAC_OUTPUT_DIR=/path/to/outputs/spark
+bash run_exp.sh
 ```
+
+The committed experiment uses ConvNeXt-Small, input dimensions `1120 x 576`, mask ratio `0.6`, 800 epochs and one CUDA device. Set `BAC_RESUME_CHECKPOINT` to resume an existing local checkpoint. Adjust these values in `run_exp.sh` only after recording the resulting configuration.
+
+## Data
+
+The upstream implementation expected an image-folder layout with training and validation data. Confirm the loader and directory layout before starting a full run; the private mammography data is not part of this repository. Keep images, checkpoints and reconstructed samples outside version control.
+
+## Reference
+
+The implementation is based on [SparK](https://github.com/keyu-tian/SparK) and the paper *Designing BERT for Convolutional Networks: Sparse and Hierarchical Masked Modeling* by Tian et al. (ICLR 2023). This pipeline's reported downstream result was AUC-ROC 0.50; it should be treated as an experimental negative result, not a clinical conclusion.
